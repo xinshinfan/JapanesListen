@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日语博客语音播放器</title>
+    <link rel="stylesheet" href="blog_player.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>日语博客语音播放器</h1>
+            <p>输入日语博客网址，自动提取文章内容并合成语音播放</p>
+        </header>
+
+        <main>
+            <!-- 网页地址输入区域 -->
+            <div class="input-section">
+                <h2>输入博客网址或日语内容</h2>
+                <div class="input-group">
+                    <textarea id="blog-url" rows="5" placeholder="请输入日语博客网址（例如：https://example.com/blog-post）或直接输入多行日语文本"></textarea>
+                    <button id="fetch-btn" class="btn primary">处理内容</button>
+                </div>
+                <div id="status" class="status"></div>
+            </div>
+
+            <!-- 文章内容显示区域 -->
+            <div class="content-section">
+                <h2>文章内容</h2>
+                <div id="article-content" class="article-content">
+                    <div class="placeholder">请输入博客网址并点击"提取内容"按钮</div>
+                </div>
+            </div>
+
+            <!-- 播放器控制区域 -->
+            <div class="player-section">
+                <h2>语音播放器</h2>
+                <div class="shortcuts-info">
+                    <p>快捷键：空格键（播放/暂停）、←（上一句）、→（下一句）</p>
+                </div>
+                <!-- 语音角色选择区域 -->
+                <div class="speaker-section">
+                    <label for="speaker-select">选择语音角色：</label>
+                    <select id="speaker-select" class="speaker-select">
+                        <option value="">加载中...</option>
+                    </select>
+                </div>
+                <div class="player-controls">
+                    <button id="prev-btn" class="btn control" title="上一句 (←)">
+                        <span>⏮️</span>
+                    </button>
+                    <button id="play-pause-btn" class="btn control play" title="播放/暂停 (空格)">
+                        <span>▶️</span>
+                    </button>
+                    <button id="next-btn" class="btn control" title="下一句 (→)">
+                        <span>⏭️</span>
+                    </button>
+                </div>
+                <div class="progress-info">
+                    <span id="current-sentence">句子 0 / 0</span>
+                    <div class="progress-bar">
+                        <div id="progress" class="progress"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>使用本地语音合成接口：http://127.0.0.1:50021</p>
+        </footer>
+    </div>
+
+    <script src="blog_player.js"></script>
+</body>
+</html>
