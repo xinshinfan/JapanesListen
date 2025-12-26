@@ -271,6 +271,32 @@ main {
     margin-bottom: 20px;
 }
 
+.auto-play-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    font-size: 16px;
+    color: #666;
+}
+
+.auto-play-control input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #4caf50;
+    cursor: pointer;
+}
+
+.auto-play-control label {
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.auto-play-control:hover {
+    color: #4a90e2;
+}
+
 .progress-info {
     margin-top: 20px;
 }

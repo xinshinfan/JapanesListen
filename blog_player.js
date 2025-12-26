@@ -11,6 +11,7 @@ let nextBtn;
 let currentSentenceElement;
 let progressElement;
 let speakerSelect;
+let autoPlayToggle;
 
 // 全局变量
 let articleText = '';
@@ -18,6 +19,7 @@ let sentences = [];
 let currentSentenceIndex = 0;
 let isPlaying = false;
 let audio = null;
+let autoPlayNextSentence = true;
 
 // ----------------------- VITS/VOICEVOX API 配置 -----------------------
 const VOICEVOX_URL = "http://127.0.0.1:50021";
@@ -38,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     currentSentenceElement = document.getElementById('current-sentence');
     progressElement = document.getElementById('progress');
     speakerSelect = document.getElementById('speaker-select');
+    autoPlayToggle = document.getElementById('auto-play-toggle');
     
     // 基本功能元素检查
     if (!blogUrlInput || !fetchBtn || !statusElement || !articleContent) {
@@ -71,6 +74,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     if (nextBtn) {
         nextBtn.addEventListener('click', playNextSentence);
+    }
+    if (autoPlayToggle) {
+        autoPlayToggle.addEventListener('change', function() {
+            autoPlayNextSentence = this.checked;
+        });
     }
     
     // 添加键盘快捷键支持
@@ -530,8 +538,8 @@ async function playSentence(index) {
             updatePlayPauseButton();
             updateStatus('播放完成', 'success');
             
-            // 自动播放下一句
-            if (currentSentenceIndex < sentences.length - 1) {
+            // 自动播放下一句（仅当自动播放功能启用时）
+            if (autoPlayNextSentence && currentSentenceIndex < sentences.length - 1) {
                 setTimeout(() => playNextSentence(), 500);
             }
         };

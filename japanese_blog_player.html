@@ -9,8 +9,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>日语博客语音播放器</h1>
-            <p>输入日语博客网址，自动提取文章内容并合成语音播放</p>
+            <p>日语句子语音播放器</p>
         </header>
 
         <main>
@@ -23,16 +22,7 @@
                 </div>
                 <div id="status" class="status"></div>
             </div>
-
-            <!-- 文章内容显示区域 -->
-            <div class="content-section">
-                <h2>文章内容</h2>
-                <div id="article-content" class="article-content">
-                    <div class="placeholder">请输入博客网址并点击"提取内容"按钮</div>
-                </div>
-            </div>
-
-            <!-- 播放器控制区域 -->
+  <!-- 播放器控制区域 -->
             <div class="player-section">
                 <h2>语音播放器</h2>
                 <div class="shortcuts-info">
@@ -56,6 +46,10 @@
                         <span>⏭️</span>
                     </button>
                 </div>
+                <div class="auto-play-control">
+                    <input type="checkbox" id="auto-play-toggle" checked>
+                    <label for="auto-play-toggle">自动播放下一句</label>
+                </div>
                 <div class="progress-info">
                     <span id="current-sentence">句子 0 / 0</span>
                     <div class="progress-bar">
@@ -63,6 +57,15 @@
                     </div>
                 </div>
             </div>
+            <!-- 文章内容显示区域 -->
+            <div class="content-section">
+                <h2>文章内容</h2>
+                <div id="article-content" class="article-content">
+                    <div class="placeholder">请输入博客网址并点击"提取内容"按钮</div>
+                </div>
+            </div>
+
+          
         </main>
 
         <footer>
