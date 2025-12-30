@@ -13,6 +13,17 @@
         </header>
 
         <main>
+            <!-- 文件选择区域 -->
+            <div class="file-section">
+                <h2>选择学习文件</h2>
+                <div class="file-group">
+                    <label for="file-select">选择文件：</label>
+                    <select id="file-select" class="file-select">
+                        <option value="">-- 请选择文件 --</option>
+                    </select>
+                </div>
+            </div>
+
             <!-- 网页地址输入区域 -->
             <div class="input-section">
                 <h2>输入博客网址或日语内容</h2>
@@ -69,10 +80,10 @@
         </main>
 
         <footer>
-            <p>使用本地语音合成接口：http://127.0.0.1:50021</p>
+            <p>使用服务器代理访问VOICEVOX引擎</p>
         </footer>
     </div>
 
-    <script src="blog_player.js"></script>
+    <script src="blog_player.js?v=6"></script>
 </body>
 </html>

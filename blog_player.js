@@ -12,6 +12,7 @@ let currentSentenceElement;
 let progressElement;
 let speakerSelect;
 let autoPlayToggle;
+let fileSelect;
 
 // 全局变量
 let articleText = '';
@@ -22,9 +23,9 @@ let audio = null;
 let autoPlayNextSentence = true;
 
 // ----------------------- VITS/VOICEVOX API 配置 -----------------------
-const VOICEVOX_URL = "http://127.0.0.1:50021";
+const API_BASE_URL = "/api";
 // SPEAKER_ID 3 对应四国めたん (Shikoku Metan)
-const VOICEVOX_SPEAKER_ID = 3;
+const VOICEVOX_SPEAKER_ID = 13;
 const MAX_RETRIES = 3;
 
 // 初始化事件监听器
@@ -41,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
     progressElement = document.getElementById('progress');
     speakerSelect = document.getElementById('speaker-select');
     autoPlayToggle = document.getElementById('auto-play-toggle');
+    fileSelect = document.getElementById('file-select');
     
     // 基本功能元素检查
     if (!blogUrlInput || !fetchBtn || !statusElement || !articleContent) {
@@ -65,6 +67,12 @@ document.addEventListener('DOMContentLoaded', function() {
         populateSpeakerDropdown();
     }
     
+    // 填充文件选择下拉框（如果元素存在）
+    if (fileSelect) {
+        populateFileDropdown();
+        fileSelect.addEventListener('change', handleFileSelection);
+    }
+    
     // 添加播放器按钮事件监听器（如果存在）
     if (prevBtn) {
         prevBtn.addEventListener('click', playPreviousSentence);
@@ -83,8 +91,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 添加键盘快捷键支持
     document.addEventListener('keydown', function(e) {
-        // 如果焦点在输入框中，不处理快捷键
-        if (document.activeElement === blogUrlInput || document.activeElement === speakerSelect) {
+        // 如果焦点在输入框或下拉框中，不处理快捷键
+        if (document.activeElement === blogUrlInput || 
+            document.activeElement === speakerSelect || 
+            document.activeElement === fileSelect) {
             return;
         }
         
@@ -125,6 +135,13 @@ function updateStatus(message, type = 'info') {
  * 带有指数退避的 Fetch (用于提高本地连接稳定性)
  */
 async function fetchWithBackoff(url, options = {}, retries = MAX_RETRIES) {
+    // 添加ngrok跳过警告头
+    if (options.headers) {
+        options.headers['ngrok-skip-browser-warning'] = 'any';
+    } else {
+        options.headers = { 'ngrok-skip-browser-warning': 'any' };
+    }
+    
     for (let i = 0; i < retries; i++) {
         try {
             const response = await fetch(url, options);
@@ -144,7 +161,7 @@ async function fetchWithBackoff(url, options = {}, retries = MAX_RETRIES) {
                 const delay = Math.pow(2, i) * 100;
                 await new Promise(resolve => setTimeout(resolve, delay));
             } else {
-                throw new Error(`API 连接失败，请检查 VOICEVOX 引擎是否运行在 ${VOICEVOX_URL}: ${error.message}`);
+                throw new Error(`API 连接失败，请检查服务器连接: ${error.message}`);
             }
         }
     }
@@ -155,7 +172,7 @@ async function fetchWithBackoff(url, options = {}, retries = MAX_RETRIES) {
  */
 async function fetchSpeakers() {
     try {
-        const response = await fetchWithBackoff(`${VOICEVOX_URL}/speakers`, {
+        const response = await fetchWithBackoff(`${API_BASE_URL}/speakers`, {
             method: 'GET',
             headers: { 'Accept': 'application/json' }
         });
@@ -216,15 +233,67 @@ async function populateSpeakerDropdown() {
 }
 
 /**
+ * 填充文件选择下拉框
+ */
+async function populateFileDropdown() {
+    try {
+        const response = await fetchWithBackoff(`${API_BASE_URL}/files`, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+        const files = await response.json();
+        
+        fileSelect.innerHTML = '<option value="">-- 请选择文件 --</option>';
+        
+        files.forEach(file => {
+            const option = document.createElement('option');
+            option.value = file;
+            option.textContent = file;
+            fileSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('获取文件列表失败:', error);
+        updateStatus('无法加载文件列表', 'error');
+    }
+}
+
+/**
+ * 处理文件选择事件
+ */
+async function handleFileSelection() {
+    const selectedFile = fileSelect.value;
+    
+    if (!selectedFile) {
+        return;
+    }
+    
+    updateStatus('正在加载文件内容...', 'loading');
+    
+    try {
+        const response = await fetchWithBackoff(`${API_BASE_URL}/file/${encodeURIComponent(selectedFile)}`, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+        const data = await response.json();
+        
+        if (data.content) {
+            blogUrlInput.value = data.content;
+            updateStatus(`已加载文件: ${selectedFile}`, 'success');
+        }
+    } catch (error) {
+        console.error('加载文件内容失败:', error);
+        updateStatus('加载文件内容失败', 'error');
+    }
+}
+
+/**
  * VOICEVOX 步骤 1: 获取音频参数
  */
 async function getAudioQuery(text, speaker) {
-    const url = new URL(`${VOICEVOX_URL}/audio_query`);
-    url.searchParams.append("text", text);
-    url.searchParams.append("speaker", speaker);
+    const url = `${API_BASE_URL}/audio_query?text=${encodeURIComponent(text)}&speaker=${speaker}`;
 
     try {
-        const response = await fetchWithBackoff(url.toString(), {
+        const response = await fetchWithBackoff(url, {
             method: 'POST',
             headers: { 'Accept': 'application/json' }
         });
@@ -240,16 +309,15 @@ async function getAudioQuery(text, speaker) {
  * VOICEVOX 步骤 2: 合成音频
  */
 async function synthesizeSpeechAPI(audioQueryJson, speaker) {
-    const url = new URL(`${VOICEVOX_URL}/synthesis`);
-    url.searchParams.append("speaker", speaker);
+    const url = `${API_BASE_URL}/synthesis?speaker=${speaker}`;
 
     try {
-        const response = await fetchWithBackoff(url.toString(), {
+        const response = await fetchWithBackoff(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(audioQueryJson)
         });
-        return await response.blob(); // 返回 Blob 数据
+        return await response.blob();
     } catch (e) {
         console.error("步骤 2 (synthesis) 失败:", e);
         updateStatus(`语音合成失败: ${e.message}`, 'error');
@@ -523,6 +591,12 @@ async function playSentence(index) {
         
         // 调用本地语音合成接口
         const audioData = await synthesizeSpeech(sentence);
+        
+        // 检查音频数据是否成功生成
+        if (!audioData) {
+            updateStatus('语音合成失败', 'error');
+            return;
+        }
         
         // 创建音频对象并播放
         audio = new Audio(audioData);

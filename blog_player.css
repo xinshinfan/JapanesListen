@@ -51,6 +51,47 @@ main {
     }
 }
 
+/* 文件选择区域样式 */
+.file-section {
+    background-color: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.file-section h2 {
+    margin-bottom: 15px;
+    color: #4a90e2;
+}
+
+.file-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.file-group label {
+    font-weight: bold;
+    color: #4a90e2;
+    white-space: nowrap;
+}
+
+.file-select {
+    flex: 1;
+    padding: 10px 15px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.file-select:focus {
+    outline: none;
+    border-color: #4a90e2;
+}
+
 /* 输入区域样式 */
 .input-section {
     background-color: white;
